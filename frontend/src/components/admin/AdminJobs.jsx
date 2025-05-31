@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import Navbar from '../shared/Navbar'
-import { Input } from '../ui/input'
-import { Button } from '../ui/button' 
-import { useNavigate } from 'react-router-dom' 
-import { useDispatch } from 'react-redux' 
-import AdminJobsTable from './AdminJobsTable'
-import useGetAllAdminJobs from '@/hooks/useGetAllAdminJobs'
-import { setSearchJobByText } from '@/redux/jobSlice'
+import React, { useEffect, useState } from "react";
+import Navbar from "../shared/Navbar";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import AdminJobsTable from "./AdminJobsTable";
+import useGetAllAdminJobs from "@/hooks/useGetAllAdminJobs";
+import { setSearchJobByText } from "@/redux/jobSlice";
 
 const AdminJobs = () => {
   useGetAllAdminJobs();
@@ -16,23 +16,34 @@ const AdminJobs = () => {
 
   useEffect(() => {
     dispatch(setSearchJobByText(input));
-  }, [input]);
-  return (
-    <div>
-      <Navbar />
-      <div className='max-w-6xl mx-auto my-10'>
-        <div className='flex items-center justify-between my-5'>
-          <Input
-            className="w-fit"
-            placeholder="Filter by name, role"
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <Button onClick={() => navigate("/admin/jobs/create")}>New Jobs</Button>
-        </div>
-        <AdminJobsTable />
-      </div>
-    </div>
-  )
-}
+  }, [input, dispatch]);
 
-export default AdminJobs
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navbar />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <header className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+          <Input
+            type="search"
+            placeholder="Filter by company name, role..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="flex-grow max-w-md shadow-sm rounded-md border border-gray-300 dark:border-gray-700
+                       focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white"
+          />
+          <Button
+            onClick={() => navigate("/admin/jobs/create")}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6 py-2 transition"
+          >
+            New Job
+          </Button>
+        </header>
+        <section>
+          <AdminJobsTable />
+        </section>
+      </main>
+    </div>
+  );
+};
+
+export default AdminJobs;

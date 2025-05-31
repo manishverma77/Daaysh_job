@@ -1,87 +1,150 @@
-import React from 'react'
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { MoreHorizontal } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import { toast } from 'sonner';
-import { APPLICATION_API_END_POINT } from '@/utils/constant';
-import axios from 'axios';
+import React from "react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { MoreHorizontal } from "lucide-react";
+import { useSelector } from "react-redux";
+import { toast } from "sonner";
+import { APPLICATION_API_END_POINT } from "@/utils/constant";
+import axios from "axios";
 
 const shortlistingStatus = ["Accepted", "Rejected"];
 
 const ApplicantsTable = () => {
-    const { applicants } = useSelector(store => store.application);
+  const { applicants } = useSelector((store) => store.application);
 
-    const statusHandler = async (status, id) => {
-        console.log('called');
-        try {
-            axios.defaults.withCredentials = true;
-            const res = await axios.post(`${APPLICATION_API_END_POINT}/status/${id}/update`, { status });
-            console.log(res);
-            if (res.data.success) {
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            toast.error(error.response.data.message);
-        }
+  const statusHandler = async (status, id) => {
+    try {
+      axios.defaults.withCredentials = true;
+      const res = await axios.post(
+        `${APPLICATION_API_END_POINT}/status/${id}/update`,
+        { status }
+      );
+      if (res.data.success) {
+        toast.success(res.data.message);
+      } else {
+        toast.error("Failed to update status.");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Something went wrong");
     }
+  };
 
+  if (!applicants?.applications?.length) {
     return (
-        <div>
-            <Table>
-                <TableCaption>A list of your recent applied user</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>FullName</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Resume</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {
-                        applicants && applicants?.applications?.map((item) => (
-                            <tr key={item._id}>
-                                <TableCell>{item?.applicant?.fullname}</TableCell>
-                                <TableCell>{item?.applicant?.email}</TableCell>
-                                <TableCell>{item?.applicant?.phoneNumber}</TableCell>
-                                <TableCell >
-                                    {
-                                        item.applicant?.profile?.resume ? <a className="text-blue-600 cursor-pointer" href={item?.applicant?.profile?.resume} target="_blank" rel="noopener noreferrer">{item?.applicant?.profile?.resumeOriginalName}</a> : <span>NA</span>
-                                    }
-                                </TableCell>
-                                <TableCell>{item?.applicant.createdAt.split("T")[0]}</TableCell>
-                                <TableCell className="float-right cursor-pointer">
-                                    <Popover>
-                                        <PopoverTrigger>
-                                            <MoreHorizontal />
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-32">
-                                            {
-                                                shortlistingStatus.map((status, index) => {
-                                                    return (
-                                                        <div onClick={() => statusHandler(status, item?._id)} key={index} className='flex w-fit items-center my-2 cursor-pointer'>
-                                                            <span>{status}</span>
-                                                        </div>
-                                                    )
-                                                })
-                                            }
-                                        </PopoverContent>
-                                    </Popover>
+      <div className="p-6 text-center text-gray-500">
+        No applicants have applied for this job.
+      </div>
+    );
+  }
 
-                                </TableCell>
+  return (
+    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+      <Table className="min-w-full divide-y divide-gray-200">
+        <TableCaption className="text-gray-500 text-sm italic py-2">
+          A list of your recent applied users
+        </TableCaption>
+        <TableHeader>
+          <TableRow className="bg-gray-50">
+            <TableHead className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Full Name
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Email
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Contact
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Resume
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Date
+            </TableHead>
+            <TableHead className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Action
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {applicants.applications.map((item) => {
+            const applicant = item?.applicant;
 
-                            </tr>
-                        ))
-                    }
+            if (!applicant) {
+              console.warn("Missing applicant data for application:", item);
+              return null;
+            }
 
-                </TableBody>
+            return (
+              <TableRow
+                key={item._id}
+                className="bg-white hover:bg-indigo-50 transition-colors duration-200 cursor-pointer"
+              >
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {applicant.fullname || "N/A"}
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {applicant.email || "N/A"}
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {applicant.phoneNumber || "N/A"}
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 underline">
+                  {applicant.profile?.resume ? (
+                    <a
+                      href={applicant.profile.resume}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-indigo-800"
+                    >
+                      {applicant.profile.resumeOriginalName || "Resume"}
+                    </a>
+                  ) : (
+                    "N/A"
+                  )}
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {item.createdAt ? item.createdAt.split("T")[0] : "N/A"}
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        aria-label="Actions"
+                        className="p-1 rounded hover:bg-gray-200 transition"
+                      >
+                        <MoreHorizontal className="text-gray-500 hover:text-indigo-600" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-32 shadow-lg border border-gray-200 rounded-md p-1 bg-white">
+                      {shortlistingStatus.map((status) => (
+                        <div
+                          key={status}
+                          onClick={() =>
+                            statusHandler(status.toLowerCase(), item._id)
+                          }
+                          className="cursor-pointer hover:bg-indigo-100 px-3 py-1 rounded text-gray-700 select-none transition"
+                        >
+                          {status}
+                        </div>
+                      ))}
+                    </PopoverContent>
+                  </Popover>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
 
-            </Table>
-        </div>
-    )
-}
-
-export default ApplicantsTable
+export default ApplicantsTable;
