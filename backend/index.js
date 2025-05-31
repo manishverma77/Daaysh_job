@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: "daayshjob-production-1693.up.railway.app",
+  origin: "https://daayshjob-production-1693.up.railway.app/",
   credentials: true,
 };
 app.use(cors(corsOptions));
